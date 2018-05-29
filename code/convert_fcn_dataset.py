@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from vgg import vgg_16
+import traceback
+import dataset_utils
 
 
 flags = tf.app.flags
@@ -50,15 +52,16 @@ def dict_to_tf_example(data, label):
     if height < vgg_16.default_image_size or width < vgg_16.default_image_size:
         # 保证最后随机裁剪的尺寸
         return None
-
+    fname = data[data.rfind('/') + 1:]
+    print(fname)
     # Your code here, fill the dict
     feature_dict = {
-        'image/height': None,
-        'image/width': None,
-        'image/filename': None,
-        'image/encoded': None,
-        'image/label': None,
-        'image/format': None,
+        'image/height': dataset_utils.int64_feature(height),
+        'image/width': dataset_utils.int64_feature(width),
+        'image/filename': dataset_utils.bytes_feature(fname.encode('utf8')),
+        'image/encoded': dataset_utils.bytes_feature(encoded_data),
+        'image/label': dataset_utils.bytes_feature(encoded_label),
+        'image/format': dataset_utils.bytes_feature('jpeg'.encode('utf8')),
     }
     example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
     return example
@@ -66,7 +69,19 @@ def dict_to_tf_example(data, label):
 
 def create_tf_record(output_filename, file_pars):
     # Your code here
-    pass
+    #pass
+    writer = tf.python_io.TFRecordWriter(output_filename)
+    for idx, example in enumerate(file_pars):
+        try:
+            tf_example = dict_to_tf_example(example[0], example[1])
+            if tf_example is not None:
+                writer.write(tf_example.SerializeToString())
+        except:
+        	error_msg = traceback.format_exc()
+	        logging.warning('error_msg: %s ', error_msg)
+            #logging.warning('Invalid example: %s, ignoring.', example[0])
+
+    writer.close()
 
 
 def read_images_names(root, train=True):
