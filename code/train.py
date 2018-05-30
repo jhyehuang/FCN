@@ -7,6 +7,7 @@ import time
 import cv2
 import numpy as np
 import tensorflow as tf
+import copy
 
 import pydensecrf.densecrf as dcrf
 import vgg
@@ -330,19 +331,20 @@ with sess:
 
         gs, _ = sess.run([global_step, train_step], feed_dict=feed_dict_to_use)
         if gs % 10 == 0:
+            tmp_step=copy.deepcopy(gs)
             gs, loss, summary_string = sess.run([global_step, cross_entropy_loss, merged_summary_op], feed_dict=feed_dict_to_use)
             logging.debug("step {0} Current Loss: {1} ".format(gs, loss))
             end = time.time()
             logging.debug("[{0:.2f}] imgs/s".format(10 * batch_size / (end - start)))
             start = end
 
-            summary_string_writer.add_summary(summary_string, i)
+            summary_string_writer.add_summary(summary_string, 0000)
 
-            if gs % 100 == 0:
-	            save_path = saver.save(sess, os.path.join(log_folder, "model.ckpt"), global_step=gs)
+            if tmp_step % 100 == 0:
+	            save_path = saver.save(sess, os.path.join(log_folder, "model.ckpt"), global_step=0000)
 	            logging.debug("Model saved in file: %s" % save_path)
 
-            if gs % 200 == 0:
+            if tmp_step % 200 == 0:
 	            eval_folder = os.path.join(FLAGS.output_dir, 'eval')
 	            if not os.path.exists(eval_folder):
 	                os.makedirs(eval_folder)
