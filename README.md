@@ -2,7 +2,7 @@
 
 # 2、在convert_fcn_dataset.py中代码补充完整,生成的tfrecord文件：** 
 
-    生成的数据集.jpg
+    ![Image text](https://raw.githubusercontent.com/hongmaju/light7Local/master/img/productShow/20170518152848.png)
 # 3、使用google 免费GPU进行的训练,日志输出和训练过程请查看以下文件：** 
     w10_huangzhijie_107158044.ipynb
 
